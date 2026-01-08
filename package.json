@@ -9,5 +9,13 @@
     "build:backend": "pnpm --filter backend build",
     "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
     "install:all": "pnpm install"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "lucide-react": "^0.562.0",
+    "next-auth": "^5.0.0-beta.30",
+    "react-hook-form": "^7.70.0",
+    "sonner": "^2.0.7",
+    "zod": "^4.3.5"
   }
 }
