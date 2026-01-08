@@ -1,7 +1,7 @@
 'use client';
 
 import { signIn, signOut, useSession } from 'next-auth/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 const GoogleIcon = () => (
@@ -16,6 +16,23 @@ const GoogleIcon = () => (
 export default function AuthButtons() {
   const { data: session, status } = useSession();
   const [isRedirecting, setIsRedirecting] = React.useState(false);
+  const [googleAvailable, setGoogleAvailable] = useState<boolean | null>(null);
+
+  // Verifica se o Google OAuth está disponível
+  useEffect(() => {
+    fetch('/api/auth/providers')
+      .then(res => res.json())
+      .then(providers => {
+        setGoogleAvailable(!!providers.google);
+        if (!providers.google) {
+          console.warn('⚠️ Google OAuth não está configurado. Configure GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET no .env.local');
+        }
+      })
+      .catch(err => {
+        console.error('Erro ao verificar providers:', err);
+        setGoogleAvailable(false);
+      });
+  }, []);
 
   if (status === 'loading') {
     return <p className="text-sm text-muted-foreground">Carregando...</p>;
@@ -47,9 +64,45 @@ export default function AuthButtons() {
     );
   }
 
+  const handleGoogleSignIn = async () => {
+    if (googleAvailable === false) {
+      alert('Google OAuth não está configurado. Configure GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET no arquivo frontend/.env.local');
+      return;
+    }
+
+    setIsRedirecting(true);
+    try {
+      // O signIn redireciona automaticamente para o Google OAuth
+      await signIn('google', {
+        callbackUrl: '/dashboard',
+        redirect: true
+      });
+    } catch (error: any) {
+      console.error('Erro ao fazer login com Google:', error);
+      setIsRedirecting(false);
+      alert(`Erro ao fazer login: ${error?.message || 'Credenciais do Google não configuradas'}`);
+    }
+  };
+
+  // Se ainda não verificou se o Google está disponível, mostra loading
+  if (googleAvailable === null) {
+    return <p className="text-sm text-muted-foreground">Carregando...</p>;
+  }
+
+  // Se Google não está disponível, mostra mensagem
+  if (!googleAvailable) {
+    return (
+      <div className="p-4 bg-yellow-900/20 border border-yellow-500/50 rounded-lg">
+        <p className="text-yellow-400 text-sm text-center">
+          ⚠️ Google OAuth não configurado. Configure GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET no arquivo frontend/.env.local
+        </p>
+      </div>
+    );
+  }
+
   return (
     <button
-      onClick={async () => { setIsRedirecting(true); await signIn('google', { callbackUrl: '/' }); }}
+      onClick={handleGoogleSignIn}
       className="
         px-4 py-2 border flex items-center justify-center gap-3 
         border-slate-200 rounded-lg 

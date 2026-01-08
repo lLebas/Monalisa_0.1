@@ -7,6 +7,7 @@
     "dev:backend": "pnpm --filter backend start:dev",
     "build:frontend": "pnpm --filter frontend build",
     "build:backend": "pnpm --filter backend build",
+    "build": "pnpm build:backend && pnpm build:frontend",
     "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
     "install:all": "pnpm install"
   },
@@ -17,5 +18,8 @@
     "react-hook-form": "^7.70.0",
     "sonner": "^2.0.7",
     "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

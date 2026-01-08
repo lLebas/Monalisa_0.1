@@ -38,9 +38,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // Authenticated users hitting /login -> redirect to home (optional UX)
+  // Authenticated users hitting /login -> redirect to dashboard
   if (pathname === '/login') {
-    return NextResponse.redirect(new URL('/', req.url))
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
   const role = (token as unknown as { role?: string }).role || 'user'

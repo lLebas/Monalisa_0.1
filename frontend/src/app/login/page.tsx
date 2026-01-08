@@ -1,7 +1,39 @@
+"use client";
+
 import AuthButtons from "@/components/AuthButtons";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
+export const dynamic = 'force-dynamic';
 export default function LoginPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Verifica se há erro na URL
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      if (errorParam === "AccessDenied") {
+        setError("Acesso negado: apenas emails @assessorialpha.com podem fazer login.");
+      } else if (errorParam === "Configuration") {
+        setError("Erro de configuração. Entre em contato com o administrador.");
+      } else {
+        setError("Erro ao fazer login. Tente novamente.");
+      }
+    }
+
+    // Se o usuário está autenticado, redireciona para dashboard
+    if (status === "authenticated" && session) {
+      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      // Limpa o parâmetro de erro antes de redirecionar
+      const cleanUrl = callbackUrl.split("?")[0];
+      router.push(cleanUrl);
+    }
+  }, [status, session, router, searchParams]);
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
       <div className="absolute inset-0 z-0" style={{
@@ -21,9 +53,16 @@ export default function LoginPage() {
         <p className="text-gray-300 text-center mb-8 text-base md:text-lg">
           Faça login com sua conta Google da Assessoria Alpha para continuar.
         </p>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-900/20 border border-red-500/50 rounded-lg">
+            <p className="text-red-400 text-sm text-center">{error}</p>
+          </div>
+        )}
+
         <AuthButtons />
         <div className="w-full text-center text-gray-500 text-xs mt-8">
-          Copyright © 2025 Assessoria Alpha
+          Copyright © 2026 Assessoria Alpha
         </div>
       </div>
     </div>

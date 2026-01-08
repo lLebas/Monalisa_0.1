@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import api from "@/lib/api";
 
 export function ApiTest() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<{ status?: string; backend?: string; database?: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
